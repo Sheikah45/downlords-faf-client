@@ -65,7 +65,7 @@
 
 
         <Button fx:id="generateMapButton" mnemonicParsing="false"
-                onAction="#onGenerateMapButtonClicked"
+                onAction="#onGenerateMapButtonClicked" defaultButton="true"
                 styleClass="game-generate-map" text="%game.generate" contentDisplay="RIGHT"
                 GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="LEFT">
         </Button>

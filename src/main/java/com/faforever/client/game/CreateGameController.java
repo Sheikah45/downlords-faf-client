@@ -50,6 +50,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -75,10 +76,10 @@ import static javafx.scene.layout.BackgroundRepeat.NO_REPEAT;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
+@Slf4j
 public class CreateGameController implements Controller<Pane> {
 
   private static final int MAX_RATING_LENGTH = 4;
-  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String STYLE_CLASS_DUAL_LIST_CELL = "create-game-dual-list-cell";
   private final MapService mapService;
   private final ModService modService;
@@ -248,7 +249,7 @@ public class CreateGameController implements Controller<Pane> {
     try {
       modService.getActivatedSimAndUIMods().forEach(mod -> modListView.getSelectionModel().select(mod));
     } catch (IOException e) {
-      logger.error("Activated mods could not be loaded", e);
+      log.error("Activated mods could not be loaded", e);
     }
     modListView.scrollTo(modListView.getSelectionModel().getSelectedItem());
   }
@@ -411,7 +412,7 @@ public class CreateGameController implements Controller<Pane> {
       }
     } catch (Exception e) {
       notificationService.addImmediateErrorNotification(e, "mapGenerator.generationFailed");
-      logger.error("Map generation failed", e);
+      log.error("Map generation failed", e);
     }
   }
 
@@ -421,7 +422,7 @@ public class CreateGameController implements Controller<Pane> {
     try {
       modService.overrideActivatedMods(modListView.getSelectionModel().getSelectedItems());
     } catch (IOException e) {
-      logger.warn("Activated mods could not be updated", e);
+      log.warn("Activated mods could not be updated", e);
     }
 
     Set<String> simMods = selectedModVersions.stream()
@@ -437,7 +438,7 @@ public class CreateGameController implements Controller<Pane> {
         onlyForFriendsCheckBox.isSelected() ? GameVisibility.PRIVATE : GameVisibility.PUBLIC);
 
     gameService.hostGame(newGameInfo).exceptionally(throwable -> {
-      logger.warn("Game could not be hosted", throwable);
+      log.warn("Game could not be hosted", throwable);
       notificationService.addNotification(
           new ImmediateErrorNotification(
               i18n.get("errorTitle"),

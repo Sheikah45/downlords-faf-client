@@ -28,6 +28,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -43,9 +44,9 @@ import java.util.function.Function;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
+@Slf4j
 public class GenerateMapController implements Controller<Pane> {
 
-  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final PreferencesService preferencesService;
   private final NotificationService notificationService;
   private final MapGeneratorService mapGeneratorService;
@@ -224,7 +225,7 @@ public class GenerateMapController implements Controller<Pane> {
       }
     } catch (Exception e) {
       notificationService.addImmediateErrorNotification(e, "mapGenerator.generationFailed");
-      logger.error("Map generation failed", e);
+      log.error("Map generation failed", e);
     }
     onCloseButtonClickedListener.run();
   }
