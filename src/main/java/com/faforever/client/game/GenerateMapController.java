@@ -74,18 +74,7 @@ public class GenerateMapController implements Controller<Pane> {
   private boolean initialized;
 
   public void initialize() {
-    if (preferencesService.getPreferences().getForgedAlliance().getInstallationPath() == null) {
-      preferenceUpdateListener = preferences -> {
-        if (!initialized && preferencesService.getPreferences().getForgedAlliance().getInstallationPath() != null) {
-          initialized = true;
-
-          Platform.runLater(this::init);
-        }
-      };
-      preferencesService.addUpdateListener(new WeakReference<>(preferenceUpdateListener));
-    } else {
-      init();
-    }
+    init();
   }
 
   private void init() {
