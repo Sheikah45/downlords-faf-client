@@ -12,6 +12,7 @@ import com.google.gson.JsonParser;
 import javafx.scene.image.Image;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
@@ -130,7 +131,7 @@ public class MapGeneratorService implements InitializingBean {
   }
 
   @VisibleForTesting
-  protected String queryNewestVersion() {
+  protected ComparableVersion queryNewestVersion() {
     RestTemplate restTemplate = new RestTemplate();
 
     LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -141,15 +142,21 @@ public class MapGeneratorService implements InitializingBean {
     JsonElement jsonElement = new JsonParser().parse(response.getBody());
     JsonObject mainObject = jsonElement.getAsJsonObject();
 
-    return mainObject.get("tag_name").getAsString();
+    return new ComparableVersion(mainObject.get("tag_name").getAsString());
   }
 
   @VisibleForTesting
-  public String queryMaxSupportedVersion() {
-    String version = queryNewestVersion();
-    String majorVersion = version.split("\\.")[0];
-    if (Integer.parseInt(majorVersion)>clientProperties.getMapGenerator().getMaxSupportedMajorVersion() ||
-        Integer.parseInt(majorVersion)<clientProperties.getMapGenerator().getMinSupportedMajorVersion()) {
+  public ComparableVersion queryMaxSupportedVersion() {
+
+    ComparableVersion version = queryNewestVersion();
+    ComparableVersion minVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMinSupportedMajorVersion()));
+    ComparableVersion maxVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMaxSupportedMajorVersion()+1));
+    int ctest = new ComparableVersion("1.1.1").compareTo(maxVersion);
+    int ctest2 = new ComparableVersion("2.0.0").compareTo(maxVersion);
+    int ctest3 = new ComparableVersion("2.0.1").compareTo(maxVersion);
+
+
+    if (maxVersion.compareTo(version) < 0 || version.compareTo(minVersion) < 0) {
 
       RestTemplate restTemplate = new RestTemplate();
 
@@ -161,10 +168,8 @@ public class MapGeneratorService implements InitializingBean {
       JsonElement jsonElement = new JsonParser().parse(response.getBody());
       for(JsonElement element: jsonElement.getAsJsonArray()) {
         JsonObject mainObject = element.getAsJsonObject();
-        version = mainObject.get("tag_name").getAsString();
-        majorVersion = version.split("\\.")[0];
-        if (Integer.parseInt(majorVersion)<clientProperties.getMapGenerator().getMaxSupportedMajorVersion() &&
-            Integer.parseInt(majorVersion)>clientProperties.getMapGenerator().getMinSupportedMajorVersion()) {
+        version.parseVersion(mainObject.get("tag_name").getAsString());
+        if (version.compareTo(maxVersion) < 0 && minVersion.compareTo(version) < 0) {
           return version;
         }
       }
@@ -181,14 +186,18 @@ public class MapGeneratorService implements InitializingBean {
     return generateMap(matcher.group(1), matcher.group(2));
   }
 
-
   public CompletableFuture<String> generateMap(String version, String seedAndOptions) {
+    return generateMap(new ComparableVersion(version), seedAndOptions);
+  }
 
-    String majorVersion = version.split("\\.")[0];
-    if (Integer.parseInt(majorVersion)>clientProperties.getMapGenerator().getMaxSupportedMajorVersion()){
+  public CompletableFuture<String> generateMap(ComparableVersion version, String seedAndOptions) {
+
+    ComparableVersion minVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMinSupportedMajorVersion()));
+    ComparableVersion maxVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMaxSupportedMajorVersion()+1));
+    if (version.compareTo(maxVersion) >= 0){
       notificationService.addImmediateErrorNotification(new IllegalArgumentException("Map Version Not Supported"), "mapGenerator.tooNewVersion");
     }
-    if (Integer.parseInt(majorVersion)<clientProperties.getMapGenerator().getMinSupportedMajorVersion()) {
+    if (version.compareTo(minVersion) < 0) {
       notificationService.addImmediateErrorNotification(new IllegalArgumentException("Map Version Not supported"), "mapGenerator.tooOldVersion");
     }
     String generatorExecutableFileName = String.format(GENERATOR_EXECUTABLE_FILENAME, version);
@@ -196,7 +205,7 @@ public class MapGeneratorService implements InitializingBean {
 
     CompletableFuture<Void> downloadGeneratorFuture;
     if (!Files.exists(generatorExecutablePath)) {
-      if (!VERSION_PATTERN.matcher(version).matches()) {
+      if (!VERSION_PATTERN.matcher(version.toString()).matches()) {
         log.error("Unsupported generator version: {}", version);
         return CompletableFuture.supplyAsync(() -> {
           throw new RuntimeException("Unsupported generator version: " + version);
@@ -205,7 +214,7 @@ public class MapGeneratorService implements InitializingBean {
 
       log.info("Downloading MapGenerator version: {}", version);
       DownloadMapGeneratorTask downloadMapGeneratorTask = applicationContext.getBean(DownloadMapGeneratorTask.class);
-      downloadMapGeneratorTask.setVersion(version);
+      downloadMapGeneratorTask.setVersion(version.toString());
       downloadGeneratorFuture = taskService.submitTask(downloadMapGeneratorTask).getFuture();
     } else {
       log.info("Found MapGenerator version: {}", version);
@@ -217,7 +226,7 @@ public class MapGeneratorService implements InitializingBean {
 
     String mapFilename;
     String seed;
-    if (majorVersion.equals("0")){
+    if (version.compareTo(new ComparableVersion("1")) < 0){
       seed = Long.toString(Long.parseLong(seedString));
       mapFilename = String.format(GENERATED_MAP_NAME, version, seed);
     } else {
@@ -227,7 +236,7 @@ public class MapGeneratorService implements InitializingBean {
       seed = Long.toString(seedWrapper.getLong());
     }
     GenerateMapTask generateMapTask = applicationContext.getBean(GenerateMapTask.class);
-    generateMapTask.setVersion(version);
+    generateMapTask.setVersion(version.toString());
     generateMapTask.setSeed(seed);
     generateMapTask.setGeneratorExecutableFile(generatorExecutablePath);
     generateMapTask.setMapFilename(mapFilename);

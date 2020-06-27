@@ -385,9 +385,8 @@ public class CreateGameController implements Controller<Pane> {
 
   private void onGenerateMap() {
     try {
-      String generatorVersion = mapGeneratorService.queryMaxSupportedVersion();
-      String majorVersion = generatorVersion.split("\\.")[0];
-      if (majorVersion.equals("0")) {
+      ComparableVersion generatorVersion = mapGeneratorService.queryMaxSupportedVersion();
+      if (generatorVersion.compareTo(new ComparableVersion("1")) < 0) {
         mapGeneratorService.generateMap().thenAccept(mapName -> {
           Platform.runLater(() -> {
             initMapSelection();
