@@ -85,7 +85,7 @@ public class GenerateMapController implements Controller<Pane> {
     }
   }
 
-  public void init() {
+  private void init() {
     initSpawnCountSpinner();
     initWaterSlider();
     initPlateauSlider();
