@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
@@ -9,6 +7,8 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
 <GridPane xmlns:fx="http://javafx.com/fxml/1" fx:id="generateMapRoot" hgap="10.0" styleClass="create-game-root" vgap="10.0" xmlns="http://javafx.com/javafx/8.0.141" fx:controller="com.faforever.client.game.GenerateMapController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="256.0" />
@@ -23,11 +23,11 @@
     <children>
         <!-- text="%game.create.generatedMap" -->
         <Label text="%game.generate.generatedName" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <JFXTextField fx:id="previousMapName" style="-fx-pref-width: 5em" maxHeight="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <TextField fx:id="previousMapName" style="-fx-pref-width: 5em" maxHeight="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0">
             <tooltip>
                 <Tooltip text="%game.generate.nameCaution"/>
             </tooltip>
-        </JFXTextField>
+        </TextField>
         <Label text="%game.create.spawnCount" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
         <Spinner fx:id="spawnCountSpinner" style="-fx-pref-width: 5em" maxHeight="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <tooltip>
@@ -64,14 +64,14 @@
         </HBox>
 
 
-        <JFXButton fx:id="generateMapButton" mnemonicParsing="false"
-                   onAction="#onGenerateMapButtonClicked"
-                   styleClass="game-generate-map" text="%game.generate" contentDisplay="RIGHT"
-                   GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="LEFT">
-        </JFXButton>
+        <Button fx:id="generateMapButton" mnemonicParsing="false"
+                onAction="#onGenerateMapButtonClicked"
+                styleClass="game-generate-map" text="%game.generate" contentDisplay="RIGHT"
+                GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="LEFT">
+        </Button>
 
         <!-- Cancel, Ok -->
-        <JFXButton mnemonicParsing="false" onAction="#onCloseButtonClicked" text="%cancel"
+        <Button mnemonicParsing="false" onAction="#onCloseButtonClicked" text="%cancel"
                    styleClass="more-button-padding"
                    GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="6">
             <GridPane.margin>
@@ -80,7 +80,7 @@
             <padding>
                 <Insets left="100.0" right="100.0"/>
             </padding>
-        </JFXButton>
+        </Button>
 
     </children>
     <padding>
