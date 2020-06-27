@@ -387,16 +387,7 @@ public class CreateGameController implements Controller<Pane> {
     try {
       String generatorVersion = mapGeneratorService.queryMaxSupportedVersion();
       String majorVersion = generatorVersion.split("\\.")[0];
-      if (majorVersion.equals("1")) {
-        GenerateMapController generateMapController = uiService.loadFxml("theme/play/generate_map.fxml");
-
-        Pane root = generateMapController.getRoot();
-        generateMapController.setCreateGameController(this);
-        JFXDialog dialog = uiService.showInDialog(gamesRoot, root, i18n.get("game.generate.dialog"));
-        generateMapController.setOnCloseButtonClickedListener(dialog::close);
-
-        root.requestFocus();
-      } else {
+      if (majorVersion.equals("0")) {
         mapGeneratorService.generateMap().thenAccept(mapName -> {
           Platform.runLater(() -> {
             initMapSelection();
@@ -409,6 +400,15 @@ public class CreateGameController implements Controller<Pane> {
             });
           });
         });
+      } else {
+        GenerateMapController generateMapController = uiService.loadFxml("theme/play/generate_map.fxml");
+
+        Pane root = generateMapController.getRoot();
+        generateMapController.setCreateGameController(this);
+        JFXDialog dialog = uiService.showInDialog(gamesRoot, root, i18n.get("game.generate.dialog"));
+        generateMapController.setOnCloseButtonClickedListener(dialog::close);
+
+        root.requestFocus();
       }
     } catch (Exception e) {
       notificationService.addImmediateErrorNotification(e, "mapGenerator.generationFailed");
