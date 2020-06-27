@@ -151,10 +151,6 @@ public class MapGeneratorService implements InitializingBean {
     ComparableVersion version = queryNewestVersion();
     ComparableVersion minVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMinSupportedMajorVersion()));
     ComparableVersion maxVersion = new ComparableVersion(String.valueOf(clientProperties.getMapGenerator().getMaxSupportedMajorVersion()+1));
-    int ctest = new ComparableVersion("1.1.1").compareTo(maxVersion);
-    int ctest2 = new ComparableVersion("2.0.0").compareTo(maxVersion);
-    int ctest3 = new ComparableVersion("2.0.1").compareTo(maxVersion);
-
 
     if (maxVersion.compareTo(version) < 0 || version.compareTo(minVersion) < 0) {
 
