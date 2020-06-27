@@ -23,7 +23,7 @@
     <children>
         <!-- text="%game.create.generatedMap" -->
         <Label text="%game.generate.generatedName" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <TextField fx:id="previousMapName" style="-fx-pref-width: 5em" maxHeight="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <TextField fx:id="previousMapName" promptText="nerxois_map_generator_(version)_(seed)_(options)" style="-fx-pref-width: 5em" maxHeight="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0">
             <tooltip>
                 <Tooltip text="%game.generate.nameCaution"/>
             </tooltip>
