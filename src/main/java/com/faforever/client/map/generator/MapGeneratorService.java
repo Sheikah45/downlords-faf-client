@@ -1,5 +1,6 @@
 package com.faforever.client.map.generator;
 
+import com.faforever.client.config.CacheNames;
 import com.faforever.client.config.ClientProperties;
 import com.faforever.client.io.FileUtils;
 import com.faforever.client.notification.NotificationService;
@@ -11,9 +12,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import javafx.scene.image.Image;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
@@ -68,6 +71,8 @@ public class MapGeneratorService implements InitializingBean {
 
   @Getter
   private Image generatedMapPreviewImage;
+  @Getter @Setter
+  private ComparableVersion generatorVersion;
 
   public MapGeneratorService(ApplicationContext applicationContext, PreferencesService preferencesService, TaskService taskService, NotificationService notificationService, ClientProperties clientProperties) {
     this.applicationContext = applicationContext;
@@ -86,6 +91,7 @@ public class MapGeneratorService implements InitializingBean {
     }
 
     seedGenerator = new Random();
+    generatorVersion = this.queryMaxSupportedVersion();
 
     customMapsDirectory = this.preferencesService.getPreferences().getForgedAlliance().getCustomMapsDirectory();
 
@@ -119,7 +125,7 @@ public class MapGeneratorService implements InitializingBean {
     ByteBuffer seedBuffer = ByteBuffer.allocate(8);
     seedBuffer.putLong(seedGenerator.nextLong());
     String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
-    return generateMap(queryMaxSupportedVersion(),seedString);
+    return generateMap(generatorVersion,seedString);
   }
 
   public CompletableFuture<String> generateMap(byte[] optionArray) {
@@ -127,10 +133,27 @@ public class MapGeneratorService implements InitializingBean {
     seedBuffer.putLong(seedGenerator.nextLong());
     String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
     String optionString = Base64.getEncoder().encodeToString(optionArray);
-    return generateMap(queryMaxSupportedVersion(),seedString+'_'+optionString);
+    return generateMap(generatorVersion,seedString+'_'+optionString);
+  }
+
+  public CompletableFuture<String> generateMap(String version, byte[] optionArray) {
+    ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+    seedBuffer.putLong(seedGenerator.nextLong());
+    String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+    String optionString = Base64.getEncoder().encodeToString(optionArray);
+    return generateMap(version,seedString+'_'+optionString);
+  }
+
+  public CompletableFuture<String> generateMap(ComparableVersion version, byte[] optionArray) {
+    ByteBuffer seedBuffer = ByteBuffer.allocate(8);
+    seedBuffer.putLong(seedGenerator.nextLong());
+    String seedString = Base64.getEncoder().encodeToString(seedBuffer.array());
+    String optionString = Base64.getEncoder().encodeToString(optionArray);
+    return generateMap(version,seedString+'_'+optionString);
   }
 
   @VisibleForTesting
+  @Cacheable(CacheNames.MAP_GENERATOR)
   protected ComparableVersion queryNewestVersion() {
     RestTemplate restTemplate = new RestTemplate();
 
@@ -146,6 +169,7 @@ public class MapGeneratorService implements InitializingBean {
   }
 
   @VisibleForTesting
+  @Cacheable(CacheNames.MAP_GENERATOR)
   public ComparableVersion queryMaxSupportedVersion() {
 
     ComparableVersion version = queryNewestVersion();
