@@ -50,8 +50,6 @@ public class MapGeneratorService implements InitializingBean {
    */
   public static final String GENERATED_MAP_NAME = "neroxis_map_generator_%s_%s";
   public static final String GENERATOR_EXECUTABLE_FILENAME = "MapGenerator_%s.jar";
-  public static final byte DEFAULT_SPAWN_COUNT = 6;
-  public static final byte DEFAULT_LAND_DENSITY = 26;
   @VisibleForTesting
   public static final String GENERATOR_EXECUTABLE_SUB_DIRECTORY = "map_generator";
   public static final int GENERATION_TIMEOUT_SECONDS = 60;
