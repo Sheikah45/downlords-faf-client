@@ -296,8 +296,8 @@ public class ChannelTabController extends AbstractChatTabController {
     JavaFxUtil.addListener(preferencesService.getPreferences().getChat().chatColorModeProperty(), chatColorModeChangeListener);
     addUserFilterPopup();
 
-    chatUserListView.setItems(filteredChatUserList);
     chatUserListView.setCellFactory(param -> new ChatUserListCell(uiService));
+    chatUserListView.setItems(filteredChatUserList);
 
     autoCompletionHelper.bindTo(messageTextField());
 

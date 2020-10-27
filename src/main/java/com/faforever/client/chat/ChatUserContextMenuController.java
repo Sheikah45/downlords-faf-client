@@ -3,6 +3,7 @@ package com.faforever.client.chat;
 import com.faforever.client.api.dto.GroupPermission;
 import com.faforever.client.chat.avatar.AvatarBean;
 import com.faforever.client.chat.avatar.AvatarService;
+import com.faforever.client.chat.event.ChatUserAvatarEvent;
 import com.faforever.client.config.ClientProperties;
 import com.faforever.client.fx.Controller;
 import com.faforever.client.fx.JavaFxUtil;
@@ -255,6 +256,7 @@ public class ChatUserContextMenuController implements Controller<ContextMenu> {
           player.setAvatarTooltip(newValue == null ? null : newValue.getDescription());
           player.setAvatarUrl(newValue == null ? null : Objects.toString(newValue.getUrl(), null));
           avatarService.changeAvatar(newValue);
+          player.getChatChannelUsers().forEach(chatChannelUser -> eventBus.post(new ChatUserAvatarEvent(chatChannelUser)));
         });
       });
     });

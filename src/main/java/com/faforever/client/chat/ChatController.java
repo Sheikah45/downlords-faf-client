@@ -59,12 +59,13 @@ public class ChatController extends AbstractViewController<Node> {
 
   private void onChannelJoined(Channel channel) {
     String channelName = channel.getName();
-    chatService.addUsersListener(channelName, change -> {
-      if (change.wasRemoved()) {
-        onChatUserLeftChannel(channelName, change.getValueRemoved().getUsername());
-      }
-      if (change.wasAdded()) {
-        onUserJoinedChannel(change.getValueAdded(), channelName);
+    Platform.runLater(() -> {
+      AbstractChatTabController tabController = getOrCreateChannelTab(channelName);
+      onConnected();
+      if (channelName.equals(chatService.getDefaultChannelName())) {
+        Tab tab = tabController.getRoot();
+        tabPane.getSelectionModel().select(tab);
+        nameToChatTabController.get(tab.getId()).onDisplay();
       }
     });
   }
@@ -226,34 +227,6 @@ public class ChatController extends AbstractViewController<Node> {
 
   private void joinChannel(String channelName) {
     chatService.joinChannel(channelName);
-  }
-
-  private void onChatUserLeftChannel(String channelName, String username) {
-    if (!username.equalsIgnoreCase(userService.getUsername())) {
-      return;
-    }
-    AbstractChatTabController chatTab = nameToChatTabController.get(channelName);
-    if (chatTab != null) {
-      Platform.runLater(() -> tabPane.getTabs().remove(chatTab.getRoot()));
-    }
-  }
-
-  private void onUserJoinedChannel(ChatChannelUser chatUser, String channelName) {
-    Platform.runLater(() -> {
-      if (isCurrentUser(chatUser)) {
-        AbstractChatTabController tabController = getOrCreateChannelTab(channelName);
-        onConnected();
-        if (channelName.equals(chatService.getDefaultChannelName())) {
-          Tab tab = tabController.getRoot();
-          tabPane.getSelectionModel().select(tab);
-          nameToChatTabController.get(tab.getId()).onDisplay();
-        }
-      }
-    });
-  }
-
-  private boolean isCurrentUser(ChatChannelUser chatUser) {
-    return chatUser.getUsername().equalsIgnoreCase(userService.getUsername());
   }
 
   @Override

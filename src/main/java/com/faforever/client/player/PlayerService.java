@@ -5,6 +5,10 @@ import com.faforever.client.chat.ChatUserCreatedEvent;
 import com.faforever.client.chat.avatar.AvatarBean;
 import com.faforever.client.chat.avatar.event.AvatarChangedEvent;
 import com.faforever.client.chat.event.ChatMessageEvent;
+import com.faforever.client.chat.event.ChatUserAvatarEvent;
+import com.faforever.client.chat.event.ChatUserClanEvent;
+import com.faforever.client.chat.event.ChatUserCountryEvent;
+import com.faforever.client.chat.event.ChatUserStatusEvent;
 import com.faforever.client.fx.JavaFxUtil;
 import com.faforever.client.game.Game;
 import com.faforever.client.game.GameAddedEvent;
@@ -168,6 +172,7 @@ public class PlayerService implements InitializingBean {
         if (!currentPlayers.contains(player.getUsername())) {
           player.setGame(null);
           playersThatLeftTheGame.add(player);
+          player.getChatChannelUsers().forEach(chatChannelUser -> eventBus.post(new ChatUserStatusEvent(chatChannelUser)));
         }
       }
       previousPlayersFromGame.removeAll(playersThatLeftTheGame);
@@ -177,12 +182,14 @@ public class PlayerService implements InitializingBean {
   private void updateGameDataForPlayer(Game game, Player player) {
     if (game == null) {
       player.setGame(null);
+      player.getChatChannelUsers().forEach(chatChannelUser -> eventBus.post(new ChatUserStatusEvent(chatChannelUser)));
       return;
     }
 
     if (game.getStatus() == GameStatus.CLOSED) {
       playersByGame.remove(game.getId());
       player.setGame(null);
+      player.getChatChannelUsers().forEach(chatChannelUser -> eventBus.post(new ChatUserStatusEvent(chatChannelUser)));
       return;
     }
 
@@ -192,6 +199,7 @@ public class PlayerService implements InitializingBean {
 
     if (!playersByGame.get(game.getId()).contains(player)) {
       player.setGame(game);
+      player.getChatChannelUsers().forEach(chatChannelUser -> eventBus.post(new ChatUserStatusEvent(chatChannelUser)));
       playersByGame.get(game.getId()).add(player);
       if (player.getSocialStatus() == FRIEND
           && game.getStatus() == GameStatus.OPEN
@@ -288,6 +296,10 @@ public class PlayerService implements InitializingBean {
         .ifPresent(player -> Platform.runLater(() -> {
           chatChannelUser.setPlayer(player);
           player.getChatChannelUsers().add(chatChannelUser);
+          eventBus.post(new ChatUserStatusEvent(chatChannelUser));
+          eventBus.post(new ChatUserAvatarEvent(chatChannelUser));
+          eventBus.post(new ChatUserClanEvent(chatChannelUser));
+          eventBus.post(new ChatUserCountryEvent(chatChannelUser));
         }));
   }
 
