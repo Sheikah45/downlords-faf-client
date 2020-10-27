@@ -82,6 +82,8 @@ public class ChatUserService implements InitializingBean {
           } else {
             chatChannelUser.setMapImage(null);
           }
+
+          chatChannelUser.setStatus(player.getStatus());
         }));
   }
 

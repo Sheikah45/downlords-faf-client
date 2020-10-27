@@ -415,16 +415,14 @@ public class ChatUserItemController implements Controller<Node> {
       return;
     }
 
-    Player player = playerOptional.get();
-
-    if (player.getStatus() == PlayerStatus.IDLE) {
-      playerStatusIndicator.setVisible(false);
-      playerMapImage.setVisible(false);
-    } else {
+    if (chatUser.getStatus().isPresent() && chatUser.getStatus().get() != PlayerStatus.IDLE) {
       playerStatusIndicator.setVisible(true);
       playerStatusIndicator.setImage(chatUser.getStatusImage().orElse(null));
       playerMapImage.setVisible(true);
       playerMapImage.setImage(chatUser.getMapImage().orElse(null));
+    } else {
+      playerStatusIndicator.setVisible(false);
+      playerMapImage.setVisible(false);
     }
   }
 

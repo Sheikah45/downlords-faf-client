@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -166,12 +165,10 @@ public class ChatControllerTest extends AbstractPlainJavaFxTest {
     instance.onJoinChannelButtonClicked();
 
     verify(chatService).joinChannel(TEST_CHANNEL_NAME);
-    verify(chatService).addUsersListener(eq(TEST_CHANNEL_NAME), onUsersListenerCaptor.capture());
 
     MapChangeListener.Change<? extends String, ? extends ChatChannelUser> change = mock(MapChangeListener.Change.class);
     when(change.wasAdded()).thenReturn(true);
     doReturn(new ChatChannelUser(TEST_USER_NAME, null, false)).when(change).getValueAdded();
-    onUsersListenerCaptor.getValue().onChanged(change);
 
     CountDownLatch tabAddedLatch = new CountDownLatch(1);
     instance.tabPane.getTabs().addListener((InvalidationListener) observable -> tabAddedLatch.countDown());
