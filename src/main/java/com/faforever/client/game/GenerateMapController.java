@@ -135,6 +135,9 @@ public class GenerateMapController implements Controller<Pane> {
   private void initOptionSlider(IntegerProperty lowProperty, IntegerProperty highProperty, BooleanProperty randomProperty,
                                 RangeSlider slider, HBox sliderContainer, CheckBox randomBox, HBox randomContainer) {
     sliderContainer.visibleProperty().bind(randomBox.selectedProperty().not());
+    slider.setLowValue(lowProperty.getValue());
+    slider.setHighValue(highProperty.getValue());
+    randomBox.setSelected(randomProperty.getValue());
     slider.lowValueProperty().bindBidirectional(lowProperty);
     slider.highValueProperty().bindBidirectional(highProperty);
     randomBox.selectedProperty().bindBidirectional(randomProperty);
@@ -176,6 +179,7 @@ public class GenerateMapController implements Controller<Pane> {
   }
 
   public void onGenerateMap() {
+    preferencesService.storeInBackground();
     CompletableFuture<String> generateFuture;
     if (!previousMapName.getText().isEmpty()) {
       if (!mapGeneratorService.isGeneratedMap(previousMapName.getText())) {
@@ -204,7 +208,6 @@ public class GenerateMapController implements Controller<Pane> {
           handleGenerationException(throwable);
           return null;
         });
-    preferencesService.storeInBackground();
     onCloseButtonClickedListener.run();
   }
 
