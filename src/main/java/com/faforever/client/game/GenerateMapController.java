@@ -204,6 +204,7 @@ public class GenerateMapController implements Controller<Pane> {
           handleGenerationException(throwable);
           return null;
         });
+    preferencesService.storeInBackground();
     onCloseButtonClickedListener.run();
   }
 
